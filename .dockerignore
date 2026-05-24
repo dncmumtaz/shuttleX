@@ -1,0 +1,22 @@
+# Maven build çıktıları
+target/
+
+# IDE ve OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Docker (compose build context optimizasyonu)
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+
+# Dokümantasyon ve geçici dosyalar
+*.md
+*.log

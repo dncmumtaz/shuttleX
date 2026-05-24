@@ -1,0 +1,68 @@
+services:
+  postgres-db:
+    image: postgres:15-alpine
+    container_name: shuttlex-postgres
+    environment:
+      POSTGRES_DB: shuttlex_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      # Veriler kalici named volume'de saklanir (docker compose down ile SILINMEZ)
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d shuttlex_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - shuttlex-network
+    restart: unless-stopped
+
+  backend-api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: shuttlex-backend
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/shuttlex_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      JWT_SECRET: ShuttleXSuperSecretKeyForJWTTokenGeneration2024MustBeAtLeast256BitsLong!!
+      JWT_EXPIRATION_MS: 86400000
+      APP_UPLOAD_VEHICLE_IMAGES_DIR: /app/uploads/vehicles
+    volumes:
+      - vehicle_uploads:/app/uploads
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+    networks:
+      - shuttlex-network
+    restart: unless-stopped
+
+  frontend-ui:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: shuttlex-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend-api
+    networks:
+      - shuttlex-network
+    restart: unless-stopped
+
+networks:
+  shuttlex-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    name: shuttlex_postgres_data
+    driver: local
+  vehicle_uploads:
+    name: shuttlex_vehicle_uploads
+    driver: local
