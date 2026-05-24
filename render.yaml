@@ -27,10 +27,18 @@ services:
         - backend/**
         - pom.xml
     envVars:
-      - key: SPRING_DATASOURCE_URL
+      - key: DB_HOST
         fromDatabase:
           name: shuttlex-prod-db
-          property: connectionString
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: shuttlex-prod-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: shuttlex-prod-db
+          property: database
       - key: SPRING_DATASOURCE_USERNAME
         fromDatabase:
           name: shuttlex-prod-db
